@@ -2,7 +2,7 @@ import c from "classnames";
 import classesJson from "src/data/classes.json";
 
 import { ClassGridItem } from "./class-item";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import type { CharacterClass, ClassId } from "src/models/character-class";
 
@@ -24,6 +24,7 @@ const KEYBOARD_KEYS = [
   "ArrowDown",
   "Escape",
   "Backspace",
+  "Enter", // añadimos Enter explícitamente
 ];
 
 export function ClassGrid({
@@ -71,6 +72,10 @@ export function ClassGrid({
       case "ArrowUp":
         nextIndex = Math.max(0, currentIndex - 1);
         break;
+      case "Enter":
+        event.preventDefault();
+        itemButtonRefs.current[currentIndex]?.click();
+        return;
       default:
         break;
     }
@@ -80,6 +85,13 @@ export function ClassGrid({
       itemButtonRefs.current[nextIndex]?.focus();
     }
   };
+
+  // Enfocar la primera tarjeta al entrar a la vista si no hay clase seleccionada
+  useEffect(() => {
+    if (!selectedClass && itemButtonRefs.current[0]) {
+      itemButtonRefs.current[0].focus();
+    }
+  }, [selectedClass]);
 
   return (
     <section

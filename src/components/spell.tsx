@@ -5,6 +5,7 @@ import upcastIcon from "src/assets/icons/other/upcast.png";
 import type { Spell } from "src/models/spell";
 
 import styles from "./spell.module.css";
+import { SpellTooltip } from "./spell-tooltip";
 
 export function Spell({
   spell,
@@ -16,8 +17,9 @@ export function Spell({
   detailed: boolean | undefined;
 }) {
   const [selected, setSelected] = useState(false);
-
   const [showImage, setShowImage] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const randomDuration = useMemo(() => (Math.random() + 0.5).toFixed(2), []);
   const randomDelay = useMemo(() => (Math.random() * 2 + 1).toFixed(2), []);
 
@@ -26,32 +28,41 @@ export function Spell({
     "--randomDuration": randomDuration + "s",
   } as React.CSSProperties;
 
-  useEffect(
-    function setShowImageWhenTransitionEnds() {
-      if (detailed) {
-        const transitionTime =
-          (parseFloat(randomDuration) + parseFloat(randomDelay)) * 1000;
+  useEffect(() => {
+    if (detailed) {
+      const transitionTime =
+        (parseFloat(randomDuration) + parseFloat(randomDelay)) * 1000;
 
-        const timer = setTimeout(() => {
-          setShowImage(true);
-        }, transitionTime);
+      const timer = setTimeout(() => {
+        setShowImage(true);
+      }, transitionTime);
 
-        return () => {
-          clearTimeout(timer);
-          setShowImage(false);
-        };
-      } else {
+      return () => {
+        clearTimeout(timer);
         setShowImage(false);
-      }
-    },
-    [detailed, randomDuration, randomDelay]
-  );
+      };
+    } else {
+      setShowImage(false);
+    }
+  }, [detailed, randomDuration, randomDelay]);
 
   const onClick = () => {
-    if (!detailed) {
-      return;
-    }
+    if (!detailed) return;
     setSelected(!selected);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onClick();
+    }
+
+    if (
+      ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(e.key)
+    ) {
+      e.preventDefault();
+      moveFocus(e.key);
+    }
   };
 
   return (
@@ -60,14 +71,22 @@ export function Spell({
         styles.spell,
         highlighted && !detailed && styles.highlighted,
         detailed && styles.detailed,
-        detailed && selected && styles.selected,
+        detailed && selected && styles.selected
       )}
       data-spell-id={spell.id}
       style={animatedSpellStyles}
       aria-label={spell.name}
       aria-detailed={detailed ? "true" : "false"}
-      {...(detailed ? { onClick } : {})}
+      onClick={detailed ? onClick : undefined}
+      tabIndex={detailed ? 0 : -1}
+      onKeyDown={detailed ? onKeyDown : undefined}
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+      onFocus={() => setShowTooltip(true)}
+      onBlur={() => setShowTooltip(false)}
     >
+      {detailed && showTooltip && <SpellTooltip spell={spell} />}
+
       {detailed && showImage && (
         <div className={styles.image}>
           <img src={spell.icon} alt={spell.name} className={styles.icon} />
@@ -78,4 +97,23 @@ export function Spell({
       )}
     </article>
   );
+}
+
+// Navegación con flechas entre hechizos
+function moveFocus(direction: string) {
+  const focusable = Array.from(
+    document.querySelectorAll('[tabindex="0"]')
+  ) as HTMLElement[];
+
+  const index = focusable.findIndex((el) => el === document.activeElement);
+  if (index === -1) return;
+
+  let nextIndex = index;
+  if (direction === "ArrowRight" || direction === "ArrowDown") {
+    nextIndex = (index + 1) % focusable.length;
+  } else if (direction === "ArrowLeft" || direction === "ArrowUp") {
+    nextIndex = (index - 1 + focusable.length) % focusable.length;
+  }
+
+  focusable[nextIndex].focus();
 }
