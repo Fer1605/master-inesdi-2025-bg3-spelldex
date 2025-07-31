@@ -1,5 +1,5 @@
 import c from "classnames";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import upcastIcon from "src/assets/icons/other/upcast.png";
 
 import type { Spell } from "src/models/spell";
@@ -19,6 +19,9 @@ export function Spell({
   const [selected, setSelected] = useState(false);
   const [showImage, setShowImage] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState<"top" | "bottom">("bottom");
+
+  const ref = useRef<HTMLDivElement>(null);
 
   const randomDuration = useMemo(() => (Math.random() + 0.5).toFixed(2), []);
   const randomDelay = useMemo(() => (Math.random() * 2 + 1).toFixed(2), []);
@@ -46,6 +49,19 @@ export function Spell({
     }
   }, [detailed, randomDuration, randomDelay]);
 
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+
+    if (spaceBelow < 180) {
+      setTooltipPosition("top");
+    } else {
+      setTooltipPosition("bottom");
+    }
+  }, [showTooltip]);
+
   const onClick = () => {
     if (!detailed) return;
     setSelected(!selected);
@@ -67,6 +83,7 @@ export function Spell({
 
   return (
     <article
+      ref={ref}
       className={c(
         styles.spell,
         highlighted && !detailed && styles.highlighted,
@@ -76,7 +93,6 @@ export function Spell({
       data-spell-id={spell.id}
       style={animatedSpellStyles}
       aria-label={spell.name}
-      aria-detailed={detailed ? "true" : "false"}
       onClick={detailed ? onClick : undefined}
       tabIndex={detailed ? 0 : -1}
       onKeyDown={detailed ? onKeyDown : undefined}
@@ -85,7 +101,16 @@ export function Spell({
       onFocus={() => setShowTooltip(true)}
       onBlur={() => setShowTooltip(false)}
     >
-      {detailed && showTooltip && <SpellTooltip spell={spell} />}
+      {detailed && showTooltip && (
+        <div
+          className={c(
+            styles.tooltipWrapper,
+            tooltipPosition === "top" ? styles.top : styles.bottom
+          )}
+        >
+          <SpellTooltip spell={spell} position={tooltipPosition} />
+        </div>
+      )}
 
       {detailed && showImage && (
         <div className={styles.image}>

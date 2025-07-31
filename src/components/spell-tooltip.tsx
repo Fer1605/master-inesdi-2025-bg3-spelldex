@@ -4,11 +4,16 @@ import type { Spell } from "src/models/spell";
 
 type Props = {
   spell: Spell;
+  position?: "top" | "bottom";
 };
 
-export function SpellTooltip({ spell }: Props) {
+export function SpellTooltip({ spell, position = "bottom" }: Props) {
   return (
-    <div className={styles.tooltip}>
+    <div
+      className={`${styles.tooltip} ${
+        position === "top" ? styles.tooltipTop : ""
+      }`}
+    >
       <div className={styles.name}>{spell.name}</div>
 
       <div className={styles.icons}>
@@ -21,16 +26,19 @@ export function SpellTooltip({ spell }: Props) {
           />
         )}
 
-        {spell.damage.map((dmg, i) => (
-          <img
-            key={i}
-            src={`src/assets/icons/damage/${dmg.damageType.toLowerCase()}.png`}
-            alt={dmg.damageType}
-            className={styles.icon}
-            title={dmg.damageType}
-          />
-        ))}
+        {Array.isArray(spell.damage) &&
+          spell.damage.length > 0 &&
+          spell.damage.map((dmg, i) => (
+            <img
+              key={i}
+              src={`src/assets/icons/damage/${dmg.damageType?.toLowerCase() || "default"}.png`}
+              alt={dmg.damageType || "Damage"}
+              className={styles.icon}
+              title={dmg.damageType || "Damage"}
+            />
+          ))}
       </div>
     </div>
   );
 }
+

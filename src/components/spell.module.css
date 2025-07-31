@@ -68,3 +68,19 @@
   box-shadow: 0 0 4px 2px var(--accent, var(--gold-accent));
   border-radius: 8px;
 }
+
+.tooltipWrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.tooltipWrapper.top {
+  bottom: 110%;
+}
+
+.tooltipWrapper.bottom {
+  top: 110%;
+}
