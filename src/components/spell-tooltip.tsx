@@ -33,7 +33,7 @@ export function SpellTooltip({ spell, position = "bottom" }: Props) {
           ).map((type, i) => (
             <img
               key={i}
-              src={`src/assets/icons/damage/${type}.png`}
+              src={`/assets/icons/damage/${type}.png`}
               alt={type}
               className={styles.icon}
               title={type}
