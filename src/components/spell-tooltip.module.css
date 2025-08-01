@@ -56,3 +56,25 @@
   margin-top: 0;
   margin-bottom: 8px;
 }
+
+.infoLink {
+  margin-left: 8px;
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: auto; /* permite hacer clic en el enlace */
+}
+
+.infoIcon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: brightness(1.5);
+  vertical-align: middle;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.infoIcon:hover {
+  transform: scale(1.2);
+  filter: brightness(2);
+  cursor: pointer;
+}

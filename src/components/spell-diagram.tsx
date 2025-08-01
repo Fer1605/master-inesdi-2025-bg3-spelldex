@@ -1,4 +1,5 @@
 import c from "classnames";
+import { useState } from "react";
 import spellsByClass from "src/data/spells-by-class.json";
 import spells from "src/data/spells.json";
 import { Spell } from "./spell";
@@ -37,6 +38,8 @@ export function SpellDiagram({
   const isSpellDetailed = (spell: SpellType) =>
     selectedClass && highlightedSpells.has(spell.id);
 
+  const [selectedSpellId, setSelectedSpellId] = useState<SpellId | null>(null);
+
   return (
     <div
       className={c(
@@ -58,7 +61,12 @@ export function SpellDiagram({
                   spell={spell}
                   highlighted={isSpellHighlighted(spell)}
                   detailed={isSpellDetailed(spell)}
+                  selected={selectedSpellId === spell.id}
+                  onSelect={() =>
+                    setSelectedSpellId(prev => (prev === spell.id ? null : spell.id))
+                  }
                 />
+
               ))}
             </div>
             <div className={styles.row}>
@@ -68,7 +76,12 @@ export function SpellDiagram({
                   spell={spell}
                   highlighted={isSpellHighlighted(spell)}
                   detailed={isSpellDetailed(spell)}
+                  selected={selectedSpellId === spell.id}
+                  onSelect={() =>
+                    setSelectedSpellId(prev => (prev === spell.id ? null : spell.id))
+                  }
                 />
+
               ))}
             </div>
           </div>
@@ -95,3 +108,4 @@ function groupSpellsByLevel(spells: SpellType[]) {
     return acc;
   }, {});
 }
+

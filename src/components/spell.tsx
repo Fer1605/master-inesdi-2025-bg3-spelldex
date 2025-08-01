@@ -2,23 +2,27 @@ import c from "classnames";
 import { useEffect, useMemo, useRef, useState } from "react";
 import upcastIcon from "src/assets/icons/other/upcast.png";
 
-import type { Spell } from "src/models/spell";
+import type { Spell as SpellType } from "src/models/spell";
 
 import styles from "./spell.module.css";
 import { SpellTooltip } from "./spell-tooltip";
+
+type Props = {
+  spell: SpellType;
+  highlighted: boolean | undefined;
+  detailed: boolean | undefined;
+  selected: boolean;
+  onSelect: () => void;
+};
 
 export function Spell({
   spell,
   highlighted,
   detailed,
-}: {
-  spell: Spell;
-  highlighted: boolean | undefined;
-  detailed: boolean | undefined;
-}) {
-  const [selected, setSelected] = useState(false);
+  selected,
+  onSelect,
+}: Props) {
   const [showImage, setShowImage] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState<"top" | "bottom">("bottom");
 
   const ref = useRef<HTMLDivElement>(null);
@@ -55,22 +59,13 @@ export function Spell({
     const rect = ref.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom;
 
-    if (spaceBelow < 180) {
-      setTooltipPosition("top");
-    } else {
-      setTooltipPosition("bottom");
-    }
-  }, [showTooltip]);
-
-  const onClick = () => {
-    if (!detailed) return;
-    setSelected(!selected);
-  };
+    setTooltipPosition(spaceBelow < 180 ? "top" : "bottom");
+  }, [selected]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      onClick();
+      onSelect();
     }
 
     if (
@@ -93,15 +88,11 @@ export function Spell({
       data-spell-id={spell.id}
       style={animatedSpellStyles}
       aria-label={spell.name}
-      onClick={detailed ? onClick : undefined}
+      onClick={detailed ? onSelect : undefined}
       tabIndex={detailed ? 0 : -1}
       onKeyDown={detailed ? onKeyDown : undefined}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      onFocus={() => setShowTooltip(true)}
-      onBlur={() => setShowTooltip(false)}
     >
-      {detailed && showTooltip && (
+      {detailed && selected && (
         <div
           className={c(
             styles.tooltipWrapper,
