@@ -1,6 +1,6 @@
 import styles from "./spell-tooltip.module.css";
 import upcastIcon from "src/assets/icons/other/upcast.png";
-import infoIcon from "src/assets/icons/other/info.png"; // Asegúrate de que esta ruta sea correcta
+import infoIcon from "src/assets/icons/other/info.png";
 import type { Spell } from "src/models/spell";
 
 type Props = {
